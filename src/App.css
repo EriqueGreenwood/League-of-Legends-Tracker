@@ -1,5 +1,5 @@
 #root {
-  max-width: 1280px;
+  max-width: 90vw;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
@@ -7,4 +7,51 @@
 
 .hidden {
   display: none;
+}
+
+.main-container {
+  /* outline: 1px solid red; */
+  max-height: auto;
+}
+
+/* .search-box {
+  outline: 2px solid blue;
+}
+
+.summoner-info {
+  outline: 2px solid pink;
+} */
+
+#summoner-display {
+  min-height: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.champ-stuff {
+  padding-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: start;
+  min-width: 90vw;
+}
+
+.champ-box {
+  margin: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  outline: 1px solid yellow;
+}
+
+.champ-box img {
+  max-width: 50%;
+}
+
+img {
+  max-height: 100;
+  max-width: 100;
 }
