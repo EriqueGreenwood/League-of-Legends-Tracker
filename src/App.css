@@ -10,17 +10,17 @@
 }
 
 .main-container {
-  outline: 1px solid red;
+  /* outline: 1px solid red; */
   max-height: auto;
 }
 
-.search-box {
+/* .search-box {
   outline: 2px solid blue;
 }
 
 .summoner-info {
   outline: 2px solid pink;
-}
+} */
 
 #summoner-display {
   min-height: none;
