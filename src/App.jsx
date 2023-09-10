@@ -11,32 +11,55 @@ import axios from 'axios';
   const [championNames, setChampionNames] = useState([]);
   const [challenges, setChallenges] = useState({});
   const [champImageName, setChampImageName] = useState([]);
+  const [matchIds, setMatchIds] = useState([]);
+  const [matchStats, setMatchStats] = useState([]);
   const API_KEY = import.meta.env.VITE_API_KEY;
   const BASE_API_URL = import.meta.env.VITE_BASE_API_URL;
+
+  const handleSubmit = (event) => {
+    searchForPlayer();
+  };
+
+  const handleKeyPress = (event) => {
+    if (event.key === 'Enter') {
+      handleSubmit(event);
+    }
+  };
 
   // Searches for player in Riot Games api
   
   const searchForPlayer = (event) => { 
+    event.preventDefault();
     setPlayerData([]);
     setChampList({});
     setChampionNames([]);
     setChallenges({});
     setChampImageName([]);
-    // Get server status for NA
-    let serverStatus = `${BASE_API_URL}status/v4/platform-data?api_key=${API_KEY}`;
-    axios.get(serverStatus)
-    .then((response) => {
-      console.log("server status");
-      setServerStatus(response.data);
-    });
+    // clear made divs for champ box
+    const divsToRemove = document.querySelectorAll('#champ-box-id');
+    divsToRemove.forEach((div) => {
+      div.remove();
+    })
     // Set up API call to lookup player by account name
     let playerDataURL = `${BASE_API_URL}summoner/v4/summoners/by-name/${playerSearch}?api_key=${API_KEY}`;
     // API calls to get all player data needed
-    axios.get(playerDataURL)
-    .then((response) => {
-      console.log("in first api call");
+    axios.get(playerDataURL).then((response) => {
       setPlayerData(response.data);
       return response.data;
+    }).catch((error) => {
+      if (error.response) {
+        // The request was made, and the server responded with a status code that falls out of the range of 2xx
+        console.log('Error Status:', error.response.status);
+        console.log('Error Data:', error.response.data);
+      } else if (error.request) {
+        // The request was made, but no response was received, `error.request` is an instance of XMLHttpRequest in the browser
+        const displayOrNot = document.querySelector('.summoner-info').style.display = 'none';
+        alert("No player by that name found"); 
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.log('Error:', error.message);
+      }
+      return;
     })
     .then(playerData => (axios.get(`${BASE_API_URL}challenges/v1/player-data/${playerData.puuid}?api_key=${API_KEY}`))
     .then(response => {
@@ -51,8 +74,7 @@ import axios from 'axios';
     .then((champList) => (axios.get(`https://ddragon.leagueoflegends.com/cdn/13.13.1/data/en_US/champion.json`))
     .then(response => {
       const list = response.data.data;
-      console.log(list);
-
+      
       for(let i = 0; i < champList.length; i++) {
         const champNames = [];
         for(let key in list) {
@@ -63,27 +85,43 @@ import axios from 'axios';
           }
         }
       }
-    }), [])));
+      return playerData;
+    })
+    .then(playerData => (axios.get(`https://americas.api.riotgames.com/lol/match/v5/matches/by-puuid/${playerData.puuid}/ids?start=0&count=10&api_key=${API_KEY}`))
+    .then(response => {
+      setMatchIds(response.data);
+      return response.data;
+    })
+    .then(matchIds => {
+      for(let matches in matchIds) {
+        const response = axios.get(`https://americas.api.riotgames.com/lol/match/v5/matches/${matchIds[matches]}?api_key=${API_KEY}`).then(response => {
+          setMatchStats(matchStats => [...matchStats, response.data]);
+        })
+      }
+    }), []))));
 
+    // Get server status for NA
+    let serverStatus = `${BASE_API_URL}status/v4/platform-data?api_key=${API_KEY}`;
+    axios.get(serverStatus).then((response) => {
+      setServerStatus(response.data);
+    });
+
+    const showSummoner = document.querySelector('.summoner-info').style.display = 'block';
   }
-
+  
   useEffect(() => {
     createChampDisplay();
   }, [champImageName]);
-
-  useEffect(() => {
-
-  }), []
-
-
+  
   function createChampDisplay() {
-
+    
     for(let i = 0; i < champList.length; i++) {
       let champBoxDisplay = document.getElementById("flex-container");
-
+      
       let champBox = document.createElement("div");
       champBox.setAttribute('class', 'champ-box');
-
+      champBox.setAttribute('id', 'champ-box-id');
+      
       let champImage = document.createElement("img");
       champImage.setAttribute('src', `http://ddragon.leagueoflegends.com/cdn/13.14.1/img/champion/${champImageName[i]}`);
 
@@ -104,29 +142,64 @@ import axios from 'axios';
     }
   }
 
+  function MyComponent({ matchStats }) {
+    const [pastMatches, setPastMatches] = useState([]);
+  
+    useEffect(() => {
+      setPastMatches(matchStats.map((match, index) => (
+        <div className="champ-box" key={index}>
+          <div>{match.info.gameDuration}</div>
+        </div>
+      )));
+    }, [matchStats]);
+  
+    return (
+      <div id="past-matches-container">
+        {pastMatches}
+      </div>
+    );
+  }
+
+
   return (
     <div className='main-container'>
-      <div className='search-box'>
-        <h2>League of Legends Tracker</h2>
-        <input type="text" onChange={e => setPlayerSearch(e.target.value)}/>
-        <button type="submit" onClick={e => {searchForPlayer(e)}}>{loading ? <>Loading...</> : <>Search</>}</button>
+      <h2>League of Legends Tracker</h2>
+      <div>
+        <form className='search-box'>
+          <div className='region-field'>
+            <label htmlFor="input-field" className='label'>Region</label>
+            <select type="text" id="na" placeholder="North America" onChange={e => setPlayerSearch(e.target.value)} onKeyDown={e => handleKeyPress(e)}>
+              <option value="na">North America</option>
+            </select>
+          </div>
+          <div className='search-field'>
+            <label htmlFor="input-field" className='label'>Search</label>
+            <input type="text" id="input-field" placeholder="Name" onChange={e => setPlayerSearch(e.target.value)} onKeyDown={e => handleKeyPress(e)}/>
+          </div>
+          <button type="submit"  onClick={e => {searchForPlayer(e)}}>{loading ? <>Loading...</> : <>Search</>}</button>
+        </form>
       </div>
       <div id='summoner-display'>
-        {JSON.stringify(playerData) !="{}" ? 
         <>
           <div className='summoner-info'>
             <p>Summoner Name: {playerData.name}</p>
-            <img width={100} height={100} src= {`https://ddragon.leagueoflegends.com/cdn/13.13.1/img/profileicon/${playerData.profileIconId}.png`} />
+            <img width={100} height={100} src= {`https://ddragon.leagueoflegends.com/cdn/13.13.1/img/profileicon/${playerData.profileIconId}.png`} className='champ-img'/>
             <p>Summoner Level: {playerData.summonerLevel}</p>
+            <h2>Summoners Top 10 Champions</h2>
+            <div className='champ-stuff' >
+              <table id='flex-container'>
+                <tbody>
+                  <tr>
+                  </tr>
+                </tbody>
+              </table>
+
+            </div>
+            <div className='past-matches' id='past-matches-container'>
+
+            </div>
           </div> 
-          <h2>Summoners Top 10 Champions</h2>
-          <div className='champ-stuff' id='flex-container'>
-          </div>
-        </>
-          
-          : 
-          <><p className='hidden'>No Player by that name found</p></>
-        }
+        </>   
       </div>
     </div>
   )

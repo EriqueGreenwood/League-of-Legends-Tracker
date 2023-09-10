@@ -15,21 +15,23 @@
 }
 
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
+  margin: 0;
+  border: none;
+  border-radius: 5px;
+  border-left: 3px solid #646cff;
   padding: 0.6em 1.2em;
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: white;
   cursor: pointer;
-  transition: border-color 0.25s;
-  margin: 1rem;
+  transition: border-color .25s;
+  font-size: large;
+  font-weight: bold;
+  height: 100%;
 }
 button:hover {
   border-color: #646cff;
 }
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
+
+
