@@ -43,10 +43,13 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  background-color: white;
 }
 
 #na {
   border: none;
+  background-color: white;
+  color: black;
 }
 
 .label {
@@ -57,6 +60,7 @@
 
 #input-field {
   border: none;
+  background-color: white;
 }
 
 #summoner-display {

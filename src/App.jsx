@@ -142,23 +142,28 @@ import axios from 'axios';
     }
   }
 
-  function MyComponent({ matchStats }) {
-    const [pastMatches, setPastMatches] = useState([]);
-  
-    useEffect(() => {
-      setPastMatches(matchStats.map((match, index) => (
-        <div className="champ-box" key={index}>
-          <div>{match.info.gameDuration}</div>
-        </div>
-      )));
-    }, [matchStats]);
-  
-    return (
-      <div id="past-matches-container">
-        {pastMatches}
-      </div>
-    );
-  }
+  // useEffect(() => {
+  //   showPastMatches();
+  // }, [matchStats]);
+
+  // function showPastMatches() {
+
+  //   for(let i = 0; i < matchStats.length; i++) {
+
+  //     let pastMatchDisplay = document.getElementById("past-matches-container");
+      
+  //     let matchBox = document.createElement("div");
+  //     matchBox.setAttribute('class', 'champ-box');
+  //     matchBox.setAttribute('id', 'champ-box-id');
+
+  //     let matchDuration = document.createElement("div");
+  //     matchDuration.append(matchStats[i].info.gameDuration);
+
+  //     matchBox.append(matchDuration);
+  //     pastMatchDisplay.append(matchBox);
+      
+  //   }
+  // }
 
 
   return (
